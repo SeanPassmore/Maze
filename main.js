@@ -164,6 +164,14 @@ camera.position.z = 20;
 camera.position.x = 20;
 scene.add(camera);
 
+
+
+var cubeGeometry = new THREE.CubeGeometry(1, 1, 1);
+var cubeMaterial = new THREE.MeshLambertMaterial({ color: 0xdd6666});
+var cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+cube.position.set(20,2,20);
+collide.push(cube);
+scene.add(cube);
 //create player light
 flashlight = new THREE.PointLight(0xffffff,.5,50,2);
 camera.add(flashlight);
@@ -171,6 +179,11 @@ flashlight.position.set(3,1,3);
 flashlight.target = camera;
 
 renderer.render(scene, camera);
+
+var originPoint = cube.position.clone();
+
+
+
 
 
 // create the view matrix
