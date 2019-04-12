@@ -16,14 +16,23 @@ var cameraUp = new THREE.Vector3().crossVectors( cameraRight , cameraLookAt );
 var bounceNum = 0;
 var isMoving = false;
 var moveOk = false;
+var moveDir = 0;
+var clickPos = {x:0, y:0};
 //add controls
 document.addEventListener("mousemove", look, false);
+document.addEventListener("mouseclick", click, false);
 document.addEventListener("keydown", doKeyDown, false);
 document.addEventListener("keyup", doKeyUp, false);
 
 //Mouse variables
 var firstMouseMove = true;
 var oldMousePos = {x: 0, y: 0};
+
+function click(evt){
+  clickPos.x = evt.clientX;
+  clickPos.y = eve.clientY;
+}
+
 
 //looking around
 function look(evt){
@@ -85,6 +94,7 @@ function doKeyDown(evt) {
           camStrafe.y = -cameraRight.y / 2.0;
           camStrafe.z = -cameraRight.z / 2.0;
           isMoving = true;
+          moveDir = 90;
 
 		    break;
 		case 68:  // right arrow key
@@ -93,14 +103,14 @@ function doKeyDown(evt) {
           camStrafe.y = cameraRight.y / 2.0;
           camStrafe.z = cameraRight.z / 2.0;
           isMoving = true;
-
+          moveDir = 270;
 		    break;
 		case 87:  // up arrow key
           camMove.x = cameraLookAt.x / 2.0;
           camMove.y = cameraLookAt.y / 2.0;
           camMove.z = cameraLookAt.z / 2.0;
           isMoving = true;
-
+          moveDir = 0;
 		    break;
 		case 83:  // down arrow key
 
@@ -108,57 +118,84 @@ function doKeyDown(evt) {
           camMove.y = -cameraLookAt.y / 2.0;
           camMove.z = -cameraLookAt.z / 2.0;
           isMoving = true;
-
+          moveDir = 180;
 		    break;
 		default:
 		    break;
         }
 }
+var collide =[];
+var scene = new THREE.Scene;
 
 // create scene object
-var scene = new THREE.Scene;
+
 var cubeArr = [];
-var collide =[];
 var maze = [];
-maze.push([1,0,0,1,0,0,0,0,0,0,0,0]);
-maze.push([1,0,0,1,0,0,0,0,0,0,0,0]);
-maze.push([1,0,0,1,0,0,0,0,0,0,0,0]);
-maze.push([1,0,0,1,0,0,0,0,0,0,0,0]);
-maze.push([1,0,0,1,0,0,0,0,0,0,0,0]);
-maze.push([1,0,0,1,0,0,0,0,0,0,0,0]);
-maze.push([1,0,0,1,0,0,0,0,0,0,0,0]);
-maze.push([1,0,0,1,1,1,1,1,1,1,1,1]);
-maze.push([1,0,0,0,0,0,0,0,0,0,0,0]);
-maze.push([1,0,0,0,0,0,0,0,0,0,0,0]);
-maze.push([1,1,1,1,1,1,1,1,1,1,1,1]);
-maze.push([1,0,0,0,0,0,0,0,0,0,0,0]);
+
+maze.push([1,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0]);
+maze.push([1,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0]);
+maze.push([1,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0]);
+maze.push([1,0,0,1,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0]);
+maze.push([1,0,0,1,0,0,1,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0]);
+maze.push([1,0,0,1,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]);
+maze.push([1,0,0,1,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]);
+maze.push([1,0,0,1,1,1,1,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0]);
+maze.push([1,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,1,0,0,0,0,0,0]);
+maze.push([1,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0]);
+maze.push([1,1,1,1,1,1,1,1,1,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0]);
+maze.push([1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0]);
+maze.push([1,0,1,1,1,1,1,1,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0]);
+maze.push([1,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0]);
+maze.push([1,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0]);
+maze.push([1,0,0,1,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0]);
+maze.push([1,0,0,1,0,0,1,1,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0]);
+maze.push([1,0,0,1,0,0,0,0,1,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0]);
+maze.push([1,0,0,1,0,0,0,0,1,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0]);
+maze.push([1,0,0,1,1,1,1,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0]);
+maze.push([1,0,0,0,0,0,1,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0]);
+maze.push([1,0,0,0,0,0,1,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0]);
+maze.push([1,1,1,1,1,1,1,1,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0]);
+maze.push([1,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0]);
 
 
 //Create maze
 for(var i = 0; i< maze.length; i++){
-  for(var j = 0; j<12; j++){
+  for(var j = 0; j<24; j++){
     if(maze[i][j] == 1){
       var cubeGeometry = new THREE.CubeGeometry(10, 10, 10);
-      var cubeMaterial = new THREE.MeshLambertMaterial({ color: 0xdd6666});
+      var cubeMaterial = new THREE.MeshLambertMaterial({ color: 0xF0F0F0});
       var cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
-      var cubeGeometry2 = new THREE.CubeGeometry(7, 10, 5);
-      var cubeMaterial2 = new THREE.MeshLambertMaterial({ color: 0xdd6666});
+      var cubeGeometry2 = new THREE.CubeGeometry(7, 10, 7);
+      var cubeMaterial2 = new THREE.MeshLambertMaterial({ color: 0xF0F0F0});
       var cube2 = new THREE.Mesh(cubeGeometry2, cubeMaterial2);
       cube.castShadow=true;
       cube.recieveShadow=true;
       cube.needsUpdate = true;
       cube.position.set(j*10, 5 , i*10);
-      cube2.position.set(j*10, 5 , i*10);
-      console.log(cube.position);
+
+
       collide.push(cube);
       scene.add(cube);
-      scene.add(cube2);
+
     }
   }
 }
-
+/*
+var cubeGeometry = new THREE.CubeGeometry(30, 10, 5);
+var cubeMaterial = new THREE.MeshLambertMaterial({ color: 0xdd6666});
+var cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+cube.position.set(0, 5 , 0);
+  collide.push(cube);
+scene.add(cube);
+cubeGeometry = new THREE.CubeGeometry(5, 10, 30);
+cubeMaterial = new THREE.MeshLambertMaterial({ color: 0xdd6666});
+cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+cube.position.set(20, 5 , 0);
+  collide.push(cube);
+scene.add(cube);
+*/
 // create perspective camera
-var camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 10000);
+var camera = new THREE.PerspectiveCamera(100, width / height, 0.1, 10000);
 camera.position.y = 2;
 camera.position.z = 20;
 camera.position.x = 20;
@@ -166,22 +203,14 @@ scene.add(camera);
 
 
 
-var cubeGeometry = new THREE.CubeGeometry(1, 1, 1);
-var cubeMaterial = new THREE.MeshLambertMaterial({ color: 0xdd6666});
-var cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
-cube.position.set(20,2,20);
-collide.push(cube);
-scene.add(cube);
+
 //create player light
-flashlight = new THREE.PointLight(0xffffff,.5,50,2);
+var flashlight = new THREE.SpotLight(0x666666,1,50,2);
 camera.add(flashlight);
 flashlight.position.set(3,1,3);
 flashlight.target = camera;
 
 renderer.render(scene, camera);
-
-var originPoint = cube.position.clone();
-
 
 
 
@@ -191,10 +220,7 @@ camera.up = new THREE.Vector3(0,1,0)
 camera.lookAt(0,0,0);
 
 // add lighting and add to scene
-flashlight2 = new THREE.DirectionalLight(0xffffff,3);
-flashlight2.position.set(20,20,20);
 
-scene.add(flashlight2)
 
 //Add floor
 var groundGeo = new THREE.PlaneBufferGeometry( 10000, 10000 );
@@ -211,28 +237,35 @@ renderer.shadowMap.enabled = true;
 renderer.render(scene, camera);
 var cubeCenter = new THREE.Vector3(0,0,0);
 
+
+
 function render() {
+  if(started){
+  var newLookAt = new THREE.Vector3().addVectors(camera.position, cameraLookAt);
+  camera.lookAt(newLookAt);
       var moveOk = true;
       var next = camMove.clone();
       next.add(camStrafe.clone());
       var camPos = camera.position.clone();
+      next.multiplyScalar(.01);
+      var direction = cameraLookAt.clone();
 
-      for(var i = 0; i < collide.length; i++){
-        cubeCenter = collide[i].position.clone();
+      direction.applyAxisAngle(new THREE.Vector3(0, 1, 0),((moveDir*Math.PI)/180));
 
-        if(cubeCenter.distanceTo(camPos.add(next)) < 4.3){
-          moveOk = false;
-          break;
+      var ray = new THREE.Raycaster( camPos.add(next), direction );
+      var collisionResults = ray.intersectObjects( collide );
+      if ( collisionResults.length > 0)  {
+        if(collisionResults[0].distance < 5){
+        moveOk = false;
         }
       }
       if(moveOk){
-        var newLookAt = new THREE.Vector3().addVectors(camera.position, cameraLookAt);
-        camera.lookAt(newLookAt);
         camera.position.add(camMove);
         camera.position.add(camStrafe);
+
       }
-    if(isMoving){
-      bounceNum += 2.2;
+    if(isMoving || camera.position.y > 4.5|| camera.position.y < 4){
+      bounceNum += 2;
       camera.position.y =  (Math.cos((bounceNum*5) * Math.PI / 180)) + 4;
     }
 
@@ -244,6 +277,7 @@ function render() {
     requestAnimationFrame(render);
 
 
-
+}
+else
 }
 render();
