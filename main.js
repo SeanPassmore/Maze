@@ -17,10 +17,11 @@ var bounceNum = 0;
 var isMoving = false;
 var moveOk = false;
 var moveDir = 0;
+var gameOver = false;
 var clickPos = {x:0, y:0};
 //add controls
 document.addEventListener("mousemove", look, false);
-document.addEventListener("mouseclick", click, false);
+document.addEventListener("click", click, false);
 document.addEventListener("keydown", doKeyDown, false);
 document.addEventListener("keyup", doKeyUp, false);
 
@@ -29,9 +30,28 @@ var firstMouseMove = true;
 var oldMousePos = {x: 0, y: 0};
 
 function click(evt){
-  clickPos.x = evt.clientX;
-  clickPos.y = eve.clientY;
-}
+
+  var ray = new THREE.Raycaster( camera.position, cameraLookAt);
+  if(buttons.length > 0){
+      for(var buttonIndex = 0; buttonIndex < buttons.length; buttonIndex++){
+        var collisionResults = ray.intersectObject( buttons[buttonIndex] );
+        console.log(collisionResults);
+        if ( collisionResults.length > 0)  {
+            scene.remove(scene.getObjectByName(buttons[buttonIndex].name));
+            buttons.splice(buttonIndex,1);
+        }
+      }
+    }
+    else{
+      var collisionResults = ray.intersectObjects( door );
+      if ( collisionResults.length > 0)  {
+        scene.remove(scene.getObjectByName(door[0].name));
+        gameOver = true;
+        door.splice(0,1);
+      }
+
+    }
+  }
 
 
 //looking around
@@ -131,31 +151,33 @@ var scene = new THREE.Scene;
 
 var cubeArr = [];
 var maze = [];
-
-maze.push([1,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0]);
-maze.push([1,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0]);
-maze.push([1,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0]);
-maze.push([1,0,0,1,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0]);
-maze.push([1,0,0,1,0,0,1,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0]);
-maze.push([1,0,0,1,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]);
-maze.push([1,0,0,1,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]);
-maze.push([1,0,0,1,1,1,1,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0]);
-maze.push([1,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,1,0,0,0,0,0,0]);
-maze.push([1,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0]);
-maze.push([1,1,1,1,1,1,1,1,1,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0]);
-maze.push([1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0]);
-maze.push([1,0,1,1,1,1,1,1,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0]);
-maze.push([1,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0]);
-maze.push([1,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0]);
-maze.push([1,0,0,1,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0]);
-maze.push([1,0,0,1,0,0,1,1,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0]);
-maze.push([1,0,0,1,0,0,0,0,1,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0]);
-maze.push([1,0,0,1,0,0,0,0,1,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0]);
-maze.push([1,0,0,1,1,1,1,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0]);
-maze.push([1,0,0,0,0,0,1,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0]);
-maze.push([1,0,0,0,0,0,1,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0]);
-maze.push([1,1,1,1,1,1,1,1,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0]);
-maze.push([1,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0]);
+var buttons = [];
+var door = [];
+maze.push([1,1,1,0,0,0,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]);
+maze.push([1,2,1,1,1,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1]);
+maze.push([1,0,0,0,0,0,0,0,0,1,1,1,1,1,0,1,0,1,0,1,0,1,0,1]);
+maze.push([1,0,1,1,1,1,1,1,1,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1]);
+maze.push([1,0,1,0,0,0,0,0,0,0,0,0,0,1,0,1,0,1,0,1,0,1,0,1]);
+maze.push([1,0,0,0,1,1,1,0,1,1,1,0,1,1,0,1,0,1,0,1,0,1,0,1]);
+maze.push([1,0,1,1,0,0,1,0,1,0,1,0,1,0,0,0,0,0,0,0,0,0,0,1]);
+maze.push([1,0,1,4,1,4,1,0,1,0,1,0,1,0,1,0,1,0,1,0,0,1,0,1]);
+maze.push([1,0,1,0,1,0,1,0,1,0,1,0,1,1,0,0,0,1,0,0,1,0,0,1]);
+maze.push([1,0,1,0,1,0,1,0,1,0,0,0,0,0,1,0,1,0,0,1,0,0,0,1]);
+maze.push([1,0,1,0,1,0,1,0,1,0,1,1,1,0,0,0,0,0,0,0,0,0,0,1]);
+maze.push([1,0,1,0,1,0,1,0,1,0,0,0,1,1,1,1,1,1,1,1,1,1,0,1]);
+maze.push([1,0,1,0,1,0,1,0,1,0,1,0,0,1,0,0,0,1,0,0,0,1,0,1]);
+maze.push([1,0,1,0,0,0,1,0,1,0,1,1,0,0,0,1,0,0,0,1,0,1,0,1]);
+maze.push([1,0,1,1,0,1,1,0,1,1,1,1,1,1,1,1,1,1,1,0,4,1,0,1]);
+maze.push([1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,3]);
+maze.push([1,0,1,0,0,0,1,0,1,1,1,1,1,1,1,1,1,0,1,0,1,0,1,1]);
+maze.push([1,0,1,0,1,0,1,0,1,0,0,0,0,0,0,0,1,0,1,0,1,0,1,0]);
+maze.push([1,0,1,0,0,1,1,0,1,0,1,1,1,1,1,0,1,0,1,0,1,0,1,0]);
+maze.push([1,0,1,0,0,0,1,0,1,0,1,0,0,4,1,0,1,0,1,0,1,0,1,0]);
+maze.push([1,0,1,0,1,0,1,0,1,0,1,0,1,1,1,0,1,0,1,0,1,0,1,0]);
+maze.push([1,0,0,1,0,0,1,0,1,0,1,0,0,0,0,0,1,0,1,0,1,0,1,0]);
+maze.push([0,1,0,0,0,1,1,0,1,0,1,1,1,1,1,1,1,0,1,0,1,0,1,0]);
+maze.push([0,0,1,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0]);
+maze.push([0,0,0,1,0,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0]);
 
 
 //Create maze
@@ -165,19 +187,51 @@ for(var i = 0; i< maze.length; i++){
       var cubeGeometry = new THREE.CubeGeometry(10, 10, 10);
       var cubeMaterial = new THREE.MeshLambertMaterial({ color: 0xF0F0F0});
       var cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
-      var cubeGeometry2 = new THREE.CubeGeometry(7, 10, 7);
-      var cubeMaterial2 = new THREE.MeshLambertMaterial({ color: 0xF0F0F0});
-      var cube2 = new THREE.Mesh(cubeGeometry2, cubeMaterial2);
       cube.castShadow=true;
       cube.recieveShadow=true;
       cube.needsUpdate = true;
       cube.position.set(j*10, 5 , i*10);
-
-
       collide.push(cube);
+      scene.add(cube);
+    }
+    if(maze[i][j] == 2){
+      var cubeGeometry = new THREE.CubeGeometry(5, 5, 5);
+      var cubeMaterial = new THREE.MeshLambertMaterial({ color: 0xFF0000});
+      var cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+      cube.add(new THREE.PointLight(0xFF0000,1,10,.1));
+      var cubeGeometry2 = new THREE.CubeGeometry(3, 3, 3);
+      var cubeMaterial2 = new THREE.MeshLambertMaterial({ color: 0x00FF00});
+      var cube2 = new THREE.Mesh(cubeGeometry2, cubeMaterial2);
+      cube2.add(new THREE.PointLight(0x00FF00,1,10,.1));
+      cube.castShadow=true;
+      cube.recieveShadow=true;
+      cube.needsUpdate = true;
+      cube2.position.set(j*10,1.5,i*10);
+      cube.position.set(j*10, 2.5 , i*10);
+      cube.name = "button" + i + j;
+      buttons.push(cube);
+      collide.push(cube);
+      collide.push(cube2);
+      scene.add(cube);
+      scene.add(cube2);
+    }
+    if(maze[i][j] == 3){
+      var cubeGeometry = new THREE.CubeGeometry(10, 10, 10);
+      var cubeMaterial = new THREE.MeshLambertMaterial({ color: 0xFF00FF});
+      var cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+      cube.add(new THREE.PointLight(0xFF00FF,1,10,.1));
+      cube.castShadow=true;
+      cube.recieveShadow=true;
+      cube.needsUpdate = true;
+      cube.position.set(j*10, 5 , i*10);
+      cube.name = "door";
+      door.push(cube);
+      collide.push(cube);
+
       scene.add(cube);
 
     }
+
   }
 }
 /*
@@ -205,7 +259,7 @@ scene.add(camera);
 
 
 //create player light
-var flashlight = new THREE.SpotLight(0x666666,1,50,2);
+var flashlight = new THREE.PointLight(0x6d6dFF,1,50,2);
 camera.add(flashlight);
 flashlight.position.set(3,1,3);
 flashlight.target = camera;
@@ -219,12 +273,10 @@ renderer.render(scene, camera);
 camera.up = new THREE.Vector3(0,1,0)
 camera.lookAt(0,0,0);
 
-// add lighting and add to scene
-
 
 //Add floor
 var groundGeo = new THREE.PlaneBufferGeometry( 10000, 10000 );
-var groundMat = new THREE.MeshLambertMaterial( { color: 0xffffff } );
+var groundMat = new THREE.MeshLambertMaterial( { color: 0x654321 } );
 groundMat.color.setHSL( 0.095, 1, 0.75 );
 
 var ground = new THREE.Mesh( groundGeo, groundMat );
@@ -240,7 +292,7 @@ var cubeCenter = new THREE.Vector3(0,0,0);
 
 
 function render() {
-  if(started){
+  if(!gameOver){
   var newLookAt = new THREE.Vector3().addVectors(camera.position, cameraLookAt);
   camera.lookAt(newLookAt);
       var moveOk = true;
@@ -270,14 +322,22 @@ function render() {
     }
 
 
-
-
-
     renderer.render(scene, camera);
     requestAnimationFrame(render);
-
-
+  }
+  else{
+    var text2 = document.createElement('div');
+      text2.style.position = 'absolute';
+      //text2.style.zIndex = 1;    // if you still don't see the label, try uncommenting this
+      text2.style.background = "#FFFFFF";
+      text2.style.width = 100;
+      text2.style.height = 100;
+      text2.style.fontSize = "xx-large";
+      text2.innerHTML = "You win!";
+      text2.style.top = height/2 + 'px';
+      text2.style.left = width/2 + 'px';
+      document.body.appendChild(text2);
+  }
 }
-else
-}
+
 render();
